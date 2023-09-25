@@ -1,1 +1,1 @@
-# brisksh
+# brisk-installer
