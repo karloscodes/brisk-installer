@@ -11,7 +11,7 @@
       {
         "assets": [
           {
-            "path": "install",
+            "path": "./scripts/install",
             "label": "install"
           }
         ],
