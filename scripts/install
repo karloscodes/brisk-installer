@@ -1,0 +1,98 @@
+#!/bin/bash
+
+# Define installation directory
+INSTALL_DIR="$HOME/.brisk"
+
+# Check if Nix is installed
+if command -v "nix" >/dev/null 2>&1 ; then
+else
+  echo "Nix is not installed. Please install it before running this script."
+  echo "You can install Nix using the following command:"
+  echo "  curl -L https://nixos.org/nix/install | sh"
+  exit 1
+fi
+
+# Define the GitHub repository and release information
+GITHUB_REPO="karloscodes/brisksh"
+RELEASE_TAG="v1.0.0"  # Replace with the release tag you want to download
+
+# Check if wget or curl is available
+DOWNLOADER=""
+if command -v wget &> /dev/null; then
+    DOWNLOADER="wget"
+elif command -v curl &> /dev/null; then
+    DOWNLOADER="curl -LO"
+else
+    echo "Both wget and curl are not available. Please install one of them."
+    exit 1
+fi
+
+# Check the system architecture
+ARCH=$(uname -m)
+case $ARCH in
+    x86_64)
+        PLATFORM="linux-intel"
+        ;;
+    aarch64)
+        PLATFORM="linux-arm"
+        ;;
+    arm64)
+        PLATFORM="mac-arm"
+        ;;
+    *)
+        echo "Unsupported architecture: $ARCH"
+        exit 1
+        ;;
+esac
+
+# Set the appropriate binary file name based on the platform
+BINARY_NAME="brisk-$PLATFORM"
+
+# Ensure the installation directory exists
+mkdir -p "$INSTALL_DIR"
+
+# Download the gzipped archive from the GitHub release using wget or curl
+TEMP_DIR=$(mktemp -d)
+$DOWNLOADER "https://github.com/$GITHUB_REPO/releases/download/$RELEASE_TAG/$BINARY_NAME.tar.gz" -o "$TEMP_DIR/$BINARY_NAME.tar.gz"
+
+# Verify the SHA256 checksum of the downloaded archive
+# ACTUAL_CHECKSUM=$(sha256sum "$TEMP_DIR/$BINARY_NAME.tar.gz" | awk '{print $1}')
+# if [ "$ACTUAL_CHECKSUM" != "$EXPECTED_CHECKSUM" ]; then
+#     echo "Checksum verification failed. The downloaded file may be corrupted."
+#     rm -rf "$TEMP_DIR"
+#     exit 1
+# fi
+
+# Extract the archive
+tar -xzvf "$TEMP_DIR/$BINARY_NAME.tar.gz" -C "$TEMP_DIR"
+
+# Copy the native executable to the installation directory
+cp "$TEMP_DIR/$BINARY_NAME" "$INSTALL_DIR/"
+
+# Check if the copy was successful
+if [ $? -eq 0 ]; then
+    echo "Brisk installed successfully in $INSTALL_DIR"
+else
+    echo "Failed to install Brisk. Please check for errors."
+    rm -rf "$TEMP_DIR"
+    exit 1
+fi
+
+# Clean up temporary files
+rm -rf "$TEMP_DIR"
+
+# You can add post-installation steps here if needed
+
+ZSHRC_FILE="$HOME/.zshrc"
+LINE_TO_ADD="source /path/to/your/program.sh"
+
+if [ -f "$ZSHRC_FILE" ]; then
+  # Check if the line already exists in ~/.zshrc
+  if grep -Fxq "$LINE_TO_ADD" "$ZSHRC_FILE"; then
+  else
+    echo "$LINE_TO_ADD" >> "$ZSHRC_FILE"
+  fi    
+fi
+
+
+echo "Installation complete..."
