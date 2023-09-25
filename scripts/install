@@ -14,7 +14,7 @@ fi
 
 # Define the GitHub repository and release information
 GITHUB_REPO="karloscodes/brisk-installer"
-RELEASE_TAG="v1.0.0"  # Replace with the release tag you want to download
+RELEASE_TAG=${RELEASE_TAG:-"v1.0.0"}
 
 # Check if wget or curl is available
 DOWNLOADER=""
