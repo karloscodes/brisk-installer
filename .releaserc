@@ -16,7 +16,7 @@
           }
         ],
         "addReleases": "top",
-        "draftRelease": false
+        "draftRelease": true
       }
     ]
   ]
