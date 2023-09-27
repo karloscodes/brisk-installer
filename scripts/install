@@ -15,7 +15,6 @@ fi
 
 # Define the GitHub repository and release information
 GITHUB_REPO="karloscodes/brisk-installer"
-RELEASE_TAG=${RELEASE_TAG:-"v1.0.0"}
 
 # Check if wget or curl is available
 DOWNLOADER=""
@@ -60,7 +59,7 @@ mkdir -p "$INSTALL_DIR"
 
 TEMP_DIR=$(mktemp -d)
 
-$DOWNLOADER "https://github.com/$GITHUB_REPO/releases/download/$RELEASE_TAG/$BINARY_NAME.tar.gz" -o "$TEMP_DIR/$BINARY_NAME.tar.gz"
+$DOWNLOADER "https://github.com/$GITHUB_REPO/releases/download/latest/$BINARY_NAME.tar.gz" -o "$TEMP_DIR/$BINARY_NAME.tar.gz"
 
 mkdir -p "$TEMP_DIR/unpack"
 
