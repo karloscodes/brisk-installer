@@ -22,6 +22,7 @@ jobs:
         curl -L -H "Authorization: token ${{ secrets.GH_TOKEN }}" -o brisk-macos-x64 "https://github.com/karloscodes/brisk-sh/releases/download/${{ github.event.inputs.name }}/brisk-macos-x64"
         curl -L -H "Authorization: token ${{ secrets.GH_TOKEN }}" -o brisk-macos-arm64 "https://github.com/karloscodes/brisk-sh/releases/download/${{ github.event.inputs.name }}/brisk-macos-arm64"
         curl -L -H "Authorization: token ${{ secrets.GH_TOKEN }}" -o brisk-linux-x64 "https://github.com/karloscodes/brisk-sh/releases/download/${{ github.event.inputs.name }}/brisk-linux-x64"
+        ls -lha
 
     - name: Release
       uses: softprops/action-gh-release@v1
