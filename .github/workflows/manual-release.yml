@@ -19,22 +19,22 @@ jobs:
     # Download binaries from the private repo
     - name: Download binaries
       run: |
-        curl -L -H "Authorization: token ${{ secrets.GH_TOKEN }}" -o brisk-macos-x64 https://github.com/karloscodes/brisk-sh/releases/download/ ${{ github.event.inputs.name }}/brisk-macos-x64
-        curl -L -H "Authorization: token ${{ secrets.GH_TOKEN }}" -o brisk-macos-arm64 https://github.com/karloscodes/brisk-sh/releases/download/ ${{ github.event.inputs.name }}/brisk-macos-arm64
-        curl -L -H "Authorization: token ${{ secrets.GH_TOKEN }}" -o brisk-linux-x64 https://github.com/karloscodes/brisk-sh/releases/download/ ${{ github.event.inputs.name }}/brisk-linux-x64
+        curl -L -H "Authorization: token ${{ secrets.GH_TOKEN }}" -o brisk-macos-x64 "https://github.com/karloscodes/brisk-sh/releases/download/${{ github.event.inputs.name }}/brisk-macos-x64"
+        curl -L -H "Authorization: token ${{ secrets.GH_TOKEN }}" -o brisk-macos-arm64 "https://github.com/karloscodes/brisk-sh/releases/download/${{ github.event.inputs.name }}/brisk-macos-arm64"
+        curl -L -H "Authorization: token ${{ secrets.GH_TOKEN }}" -o brisk-linux-x64 "https://github.com/karloscodes/brisk-sh/releases/download/${{ github.event.inputs.name }}/brisk-linux-x64"
 
     # Create a new GitHub release
     - name: Create GitHub Release
       id: create_release
       uses: actions/create-release@v1
       with:
-        tag_name:  ${{ github.event.inputs.name }}
-        release_name: Release  ${{ github.event.inputs.name }}
+        tag_name: ${{ github.event.inputs.name }}
+        release_name: Release ${{ github.event.inputs.name }}
         token: ${{ secrets.GH_TOKEN }}
 
     # Upload binaries to the newly created release
     - name: Upload macos-x64
-      id: upload-release-asset 
+      id: upload-macos-x64
       uses: actions/upload-release-asset@v1
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
@@ -45,7 +45,7 @@ jobs:
         token: ${{ secrets.GH_TOKEN }}
 
     - name: Upload macos-arm64
-      id: upload-release-asset 
+      id: upload-macos-arm64
       uses: actions/upload-release-asset@v1
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
@@ -56,7 +56,7 @@ jobs:
         token: ${{ secrets.GH_TOKEN }}
 
     - name: Upload linux-x64
-      id: upload-release-asset 
+      id: upload-linux-x64
       uses: actions/upload-release-asset@v1
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
@@ -65,7 +65,6 @@ jobs:
         asset_name: brisk-linux-x64
         asset_content_type: application/octet-stream
         token: ${{ secrets.GH_TOKEN }}
-    
 
     - name: Upload install
       id: upload-install-script
