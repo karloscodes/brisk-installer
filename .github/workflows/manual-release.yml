@@ -19,6 +19,12 @@ jobs:
     # Download binaries from the private repo
     - name: Download binaries
       run: |
+        curl -s https://api.github.com/repos/jgm/pandoc/releases/latest \
+          | grep "browser_download_url.*deb" \
+          | cut -d : -f 2,3 \
+          | tr -d \" \
+          | wget -qi -
+
         curl -L -H "Authorization: Bearer ${{ secrets.GH_TOKEN }}" -o brisk-macos-x64 "https://github.com/karloscodes/brisk-sh/releases/download/${{ github.event.inputs.name }}/brisk-macos-x64"
         curl -L -H "Authorization: Bearer ${{ secrets.GH_TOKEN }}" -o brisk-macos-arm64 "https://github.com/karloscodes/brisk-sh/releases/download/${{ github.event.inputs.name }}/brisk-macos-arm64"
         curl -L -H "Authorization: Bearer ${{ secrets.GH_TOKEN }}" -o brisk-linux-x64 "https://github.com/karloscodes/brisk-sh/releases/download/${{ github.event.inputs.name }}/brisk-linux-x64"

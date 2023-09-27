@@ -18,30 +18,32 @@ GITHUB_REPO="karloscodes/brisk-installer"
 
 # Check if wget or curl is available
 DOWNLOADER=""
+DOWNLOADER_FLAGS=""
 if command -v curl &> /dev/null; then
-    DOWNLOADER="curl -L" 
+    DOWNLOADER="curl"
+    DOWNLOADER_FLAGS="-L -o"
 elif command -v wget &> /dev/null; then
     DOWNLOADER="wget"
+    DOWNLOADER_FLAGS="-O"
 else
     echo "Both wget and curl are not available. Please install one of them."
     exit 1
 fi
 
-# Check the system architecture
+# Get the latest release tag
+LATEST_RELEASE=$(curl -s https://api.github.com/repos/$GITHUB_REPO/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
 
+# Check the system architecture
 ARCH="$(uname -s)-$(uname -m)"
 case $ARCH in
     Linux-x86_64)
         PLATFORM="linux-x64"
-        OS="linux"
         ;;
     Darwin-x86_64)
         PLATFORM="macos-x64"
-        OS="macos"
         ;;
     Darwin-arm64|Darwin-aarch64)
         PLATFORM="macos-arm64"
-        OS="macos"
         ;;
     *)
         echo "Unsupported architecture: $ARCH"
@@ -55,21 +57,16 @@ BINARY_NAME="brisk-$PLATFORM"
 # Ensure the installation directory exists
 mkdir -p "$INSTALL_DIR"
 
-# Download the gzipped archive from the GitHub release using wget or curl
-
+# Download the gzipped archive from the GitHub release
 TEMP_DIR=$(mktemp -d)
+$DOWNLOADER $DOWNLOADER_FLAGS "$TEMP_DIR/$BINARY_NAME" "https://github.com/$GITHUB_REPO/releases/download/$LATEST_RELEASE/$BINARY_NAME"
 
-$DOWNLOADER "https://github.com/$GITHUB_REPO/releases/download/latest/$BINARY_NAME.tar.gz" -o "$TEMP_DIR/$BINARY_NAME.tar.gz"
-
-mkdir -p "$TEMP_DIR/unpack"
-
-# Extract the archive
-tar -xzvf "$TEMP_DIR/$BINARY_NAME.tar.gz" -C "$TEMP_DIR/unpack" >/dev/null 2>&1
+chmod +x $TEMP_DIR/$BINARY_NAME
 
 # Copy the native executable to the installation directory
+cp "$TEMP_DIR/$BINARY_NAME" "$INSTALL_DIR/"
 
-cp -a "$TEMP_DIR/unpack/$BINARY_NAME/." "$INSTALL_DIR/"
-mv "$INSTALL_DIR/brisk-$OS" $INSTALL_DIR/brisk-bin
+mv "$INSTALL_DIR/brisk-$PLATFORM" "$INSTALL_DIR/brisk"
 
 # Check if the copy was successful
 if [ $? -eq 0 ]; then
@@ -83,9 +80,8 @@ fi
 # Clean up temporary files
 rm -rf "$TEMP_DIR"
 
-# You can add post-installation steps here if needed
-
-cat <<EOL >> $HOME/.brisk/brisk.zsh
+# Post-installation steps
+cat <<EOL > $HOME/.brisk/brisk.zsh
 # Save the original PS1 for restoration
 if [[ -z "$ORIGINAL_PS1" ]]; then
   ORIGINAL_PS1="$PS1"
@@ -95,8 +91,8 @@ export PATH="$HOME/.brisk/:$PATH"
 
 precmd() {
   PS1="$ORIGINAL_PS1"
- 
- # Check if the environment variable exists
+  
+  # Check if the environment variable exists
   if [[ -n "$BRISK_SHELL" ]]; then
     # Prepend "*" to the prompt
     PS1="%F{yellow}%B✾ %b%f $PS1"
@@ -114,9 +110,11 @@ if [ -f "$ZSHRC_FILE" ]; then
     echo ""
   else
     echo "$LINE_TO_ADD" >> "$ZSHRC_FILE"
-    echo "Attatching brisk to your .zshrc"
+    echo "Attaching brisk to your .zshrc"
   fi    
 fi
 
-
 echo "Installation complete..."
+echo "In order to start using brisk,"
+echo "you might need to close and reopen your terminal or run source ~/.zshrc"
+echo ""
