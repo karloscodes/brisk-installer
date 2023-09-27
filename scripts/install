@@ -62,15 +62,6 @@ TEMP_DIR=$(mktemp -d)
 
 $DOWNLOADER "https://github.com/$GITHUB_REPO/releases/download/$RELEASE_TAG/$BINARY_NAME.tar.gz" -o "$TEMP_DIR/$BINARY_NAME.tar.gz"
 
-# Verify the SHA256 checksum of the downloaded archive
-# ACTUAL_CHECKSUM=$(sha256sum "$TEMP_DIR/$BINARY_NAME.tar.gz" | awk '{print $1}')
-# if [ "$ACTUAL_CHECKSUM" != "$EXPECTED_CHECKSUM" ]; then
-#     echo "Checksum verification failed. The downloaded file may be corrupted."
-#     rm -rf "$TEMP_DIR"
-#     exit 1
-# fi
-
-
 mkdir -p "$TEMP_DIR/unpack"
 
 # Extract the archive
@@ -95,6 +86,26 @@ rm -rf "$TEMP_DIR"
 
 # You can add post-installation steps here if needed
 
+cat <<EOL >> $HOME/.brisk/brisk.zsh
+# Save the original PS1 for restoration
+if [[ -z "$ORIGINAL_PS1" ]]; then
+  ORIGINAL_PS1="$PS1"
+fi
+
+export PATH="$HOME/.brisk/:$PATH"
+
+precmd() {
+  PS1="$ORIGINAL_PS1"
+ 
+ # Check if the environment variable exists
+  if [[ -n "$BRISK_SHELL" ]]; then
+    # Prepend "*" to the prompt
+    PS1="%F{yellow}%B✾ %b%f $PS1"
+  fi
+  export SHELL=$(which zsh)
+}
+EOL
+
 ZSHRC_FILE="$HOME/.zshrc"
 LINE_TO_ADD="[ -f ~/.brisk/brisk.zsh ] && source ~/.brisk/brisk.zsh"
 
@@ -104,7 +115,7 @@ if [ -f "$ZSHRC_FILE" ]; then
     echo ""
   else
     echo "$LINE_TO_ADD" >> "$ZSHRC_FILE"
-    echo "Updating .zshrc"
+    echo "Attatching brisk to your .zshrc"
   fi    
 fi
 
