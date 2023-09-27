@@ -81,7 +81,7 @@ fi
 rm -rf "$TEMP_DIR"
 
 # Post-installation steps
-cat <<EOL > $HOME/.brisk/brisk.zsh
+cat <<'EOL' > $HOME/.brisk/brisk.zsh
 # Save the original PS1 for restoration
 if [[ -z "$ORIGINAL_PS1" ]]; then
   ORIGINAL_PS1="$PS1"
@@ -101,17 +101,18 @@ precmd() {
 }
 EOL
 
+
 ZSHRC_FILE="$HOME/.zshrc"
 LINE_TO_ADD="[ -f ~/.brisk/brisk.zsh ] && source ~/.brisk/brisk.zsh"
 
 if [ -f "$ZSHRC_FILE" ]; then
   # Check if the line already exists in ~/.zshrc
-  if grep -Fxq "$LINE_TO_ADD" "$ZSHRC_FILE"; then
+  if grep -Fq "$LINE_TO_ADD" "$ZSHRC_FILE"; then
     echo ""
   else
     echo "$LINE_TO_ADD" >> "$ZSHRC_FILE"
     echo "Attaching brisk to your .zshrc"
-  fi    
+  fi
 fi
 
 echo "Installation complete..."
