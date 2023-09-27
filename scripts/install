@@ -3,14 +3,11 @@
 # Define installation directory
 INSTALL_DIR="$HOME/.brisk"
 
-# Check if Nix is installed
+#Check if Nix is installed
 if command -v "nix" >/dev/null 2>&1 ; then
-  echo ""
+  NIX_INSTALLED=true
 else
-  echo "Nix is not installed. Please install it before running this script."
-  echo "You can install Nix using the following command:"
-  echo "  curl -L https://nixos.org/nix/install | sh"
-  exit 1
+  NIX_INSTALLED=false
 fi
 
 # Define the GitHub repository and release information
@@ -116,6 +113,15 @@ if [ -f "$ZSHRC_FILE" ]; then
 fi
 
 echo "Installation complete..."
-echo "In order to start using brisk,"
-echo "you might need to close and reopen your terminal or run source ~/.zshrc"
 echo ""
+echo "What are your next steps?"
+echo "  - Close and reopen your terminal or run source ~/.zshrc to enable the Brisk zsh extensions"
+
+# Conditionally display Nix installation instructions
+if [ "$NIX_INSTALLED" = "false" ]; then
+  echo "  - Install nix if you don't have it with the following command:"
+  echo "     curl -L https://nixos.org/nix/install | sh"
+fi
+
+echo ""
+echo "Happy Coding!"
